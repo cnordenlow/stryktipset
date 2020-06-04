@@ -272,10 +272,20 @@ get_row <- function(min_1, max_1, min_x, max_x, min_2, max_2, level){
 #https://shiny.rstudio.com/gallery/widgets.html
 #https://www.listendata.com/2018/02/shiny-tutorial-r.html
 
-ui <- dashboardPage(
-  dashboardHeader(title = "Stryktipset"),
+ui <- dashboardPage(skin = "black",
+                    dashboardHeader(title = "Stryktipset",tags$li(class = "dropdown", actionButton(inputId='show', label="Learn More", icon = icon("th")))),
+  
+  #dashboardHeader(title = "Stryktipset"),
   
   dashboardSidebar(
+    
+    sidebarMenu(id = "sidebarmenu",
+                menuItem("Dashboard", tabName = "dashboard",  icon = icon("group", lib="font-awesome")),
+                conditionalPanel("input.sidebarmenu === 'dashboard'"),
+    
+                menuItem("Mean-Square Model", tabName = "mean_square_model", icon = icon("check-circle", lib = "font-awesome")),
+                conditionalPanel("input.sidebarmenu === 'mean_square_model'",
+
     
     radioButtons("model", "Choose a model",
                  c("Mean-Square Model" = "m_mean_square",
@@ -310,7 +320,7 @@ ui <- dashboardPage(
     
     actionButton("update", "Get Optimal Row") 
     
-  ),
+  ))),
   
   
   
@@ -383,5 +393,28 @@ server <- function(input, output) {
     })
   
   #  output$mtcars <- renderTable(head(mtcars))
+
+
+
+    observeEvent(input$show, {
+      showModal(modalDialog(
+        title = "More information",
+        
+        HTML("Data based on release date of regional data. There may be a later print on aggregate level. <br><br>
+        <b>Initial Jobless Claims:</b> People filing to receive unenpmoyment insurance benefits for the first time. Reliable number. Moves close to general economy, good indicator. <br><br>
+        <b>Continuing Jobless Claims:</b> People who are continuing filing to receive unenpmoyment insurance. <br><br>
+        <b>Unemployment Rate:</b> The unemployment rate measured as the number of persons unemployed divided by the civilian labor force.<br><br>
+        <b>Participation Rate:</b> The participation rate refers to the total number of people or individuals who are currently employed or in search of a job.<br><br>
+        <b>Employment-to-population rate:</b> The employment-to-population ratio is equal to the number of persons employed divided by the working-age population.<br><br>
+        <b>Civilian Population:</b> In the United States, the civilian noninstitutional population refers to people 16 years of age and older residing in the 50 States and the District of Columbia who are not inmates of institutions (penal, mental facilities, homes for the aged), and who are not on active duty in the Armed Forces.<br><br>
+             
+         "
+             
+        ),
+        
+        easyClose = TRUE
+      ))
+    })
+
 }
 shinyApp(ui, server)
