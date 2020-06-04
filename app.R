@@ -19,9 +19,16 @@ setwd("c:/Users/chris/Documents/R_Studio/")
 
 dat <-read_excel('data_stryk_test_loop.xlsx')
 
-min_value = 7
+
+### EXTRA CRITERIAS ###
+
+min_value = 7 #Min med positivt spelvärde
 #Minimun totalt spelvarde 
-min_total_value = 15
+min_total_value = 15 #Min radens totala spelvarde
+
+##Which row number to select
+select_row =1
+
 
 #Odds inom buckets
 #bucket_1_min = 15
@@ -37,8 +44,7 @@ min_total_value = 15
 #crit_min_buck_4 = 11
 
 
-##Which row number?
-select_row =1
+
 
 #
 #Criterias Garderingar
@@ -50,12 +56,10 @@ number_1 = 8
 number_0 = 5
 number_2 = 8
 
-
-
-#
 number_gardering = 5
 #
 min_pos_gard_value = 1
+
 
 
 #Calculate value
@@ -73,7 +77,6 @@ data_odds <- as.data.frame(t(data_odds))
 #all_combinations_odds <- expand(data_odds, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13)
 all_combinations_odds <- expand.grid(data_odds)
 
-
 all_combinations_odds <- tibble::rownames_to_column(all_combinations_odds, "Row")
 
 
@@ -85,11 +88,28 @@ data_value <- as.data.frame(t(data_value))
 
 #all_combinations_value <- expand(data_value, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13)
 all_combinations_value <- expand.grid(data_value)
-
-
 all_combinations_value <- tibble::rownames_to_column(all_combinations_value, "Row")
 
+all_combinations_value$obs_value <- rowSums(all_combinations_value[,2:14] > 0)
+all_combinations_value <- all_combinations_value%>%
+mutate(total_value = V1 + V2 + V3 +V4 +V5+V6+V7+V8+V9+V10+V11+V12+V13)
 
+###Att ha kriteriet här gör att man slipper ha det i funktionen. Borde gå snabbare.
+  ### Criteria: Calculate value  / spelvarde. Kommer alltid vilja ha en grundrad med positivt spelvärde. 
+  #regel summa spelv?rde som minst -25
+  all_combinations_value <- all_combinations_value%>%
+    filter(obs_value >= min_value)%>%
+  filter(total_value > min_total_value)
+    
+  #Decrease number of rows from new criteria
+  temp <- all_combinations_value %>%
+    select(Row)
+  
+  all_combinations_odds <- left_join(temp, all_combinations_odds, by = "Row")%>%
+    mutate(total_odds = V1 + V2 + V3 +V4 +V5+V6+V7+V8+V9+V10+V11+V12+V13)
+  
+  all_combinations_1x2 <- left_join(temp, all_combinations_1x2, by = "Row")
+  
 
 
 
@@ -98,21 +118,18 @@ data_1x2 <- dat%>%
   select(res_1, res_0, res_2)
 
 data_1x2 <- as.data.frame(t(data_1x2))
-
-#all_combinations_1x2 <- expand(data_1x2, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13)
 all_combinations_1x2 <- expand.grid(data_1x2)
-
-
 all_combinations_1x2 <- tibble::rownames_to_column(all_combinations_1x2, "Row")
-
-
+all_combinations_1x2$obs_1 <- rowSums(all_combinations_1x2[,2:14] == 1)
+all_combinations_1x2$obs_0 <- rowSums(all_combinations_1x2[,2:14] == 0)
+all_combinations_1x2$obs_2 <- rowSums(all_combinations_1x2[,2:14] == 2)
 
 get_row <- function(min_1, max_1, min_x, max_x, min_2, max_2, level){
   
+ ### 
+  ##############Flytta upp denna
+ ### 
   ### Criteriacount number of 1,x,2 per row
-  all_combinations_1x2$obs_1 <- rowSums(all_combinations_1x2[,2:14] == 1)
-  all_combinations_1x2$obs_0 <- rowSums(all_combinations_1x2[,2:14] == 0)
-  all_combinations_1x2$obs_2 <- rowSums(all_combinations_1x2[,2:14] == 2)
   
   all_combinations_1x2 <- all_combinations_1x2 %>%
     filter(obs_1 <= max_1 & obs_0 <= max_x & obs_2 <= max_2)%>%
@@ -125,36 +142,36 @@ get_row <- function(min_1, max_1, min_x, max_x, min_2, max_2, level){
   all_combinations_odds <- left_join(temp, all_combinations_odds, by = "Row")
   all_combinations_value <- left_join(temp, all_combinations_value, by = "Row")
   
-  
-  ### Criteria: Calculate value  / spelvarde.
+   ### 
+ 
+ ### 
+
+  ### Criteria: Calculate value  / spelvarde. Regel: minst antal med positivt spelvarde
   #regel summa spelv?rde som minst -25
-  all_combinations_value$obs_value <- rowSums(all_combinations_value[,2:14] > 0)
-  
-  all_combinations_value <- all_combinations_value%>%
-    mutate(total_value = V1 + V2 + V3 +V4 +V5+V6+V7+V8+V9+V10+V11+V12+V13)%>%
-    filter(obs_value >= min_value)%>%
-    filter(total_value > min_total_value)
-  
-  
+  #all_combinations_value <- all_combinations_value%>%
+  #filter(obs_value >= min_value)
+    
   #Decrease number of rows from new criteria
-  temp <- all_combinations_value %>%
-    select(Row)
+  #temp <- all_combinations_value %>%
+  #  select(Row)
   
-  all_combinations_odds <- left_join(temp, all_combinations_odds, by = "Row")%>%
-    mutate(total_odds = V1 + V2 + V3 +V4 +V5+V6+V7+V8+V9+V10+V11+V12+V13)
+ # all_combinations_odds <- left_join(temp, all_combinations_odds, by = "Row")%>%
+ #   mutate(total_odds = V1 + V2 + V3 +V4 +V5+V6+V7+V8+V9+V10+V11+V12+V13)
   
-  all_combinations_1x2 <- left_join(temp, all_combinations_1x2, by = "Row")
-  
-  
+  #all_combinations_1x2 <- left_join(temp, all_combinations_1x2, by = "Row")
   
   
   
   
+  
+  ###Fråga: lägg in total value för "all_combinations_odds"
   
   ##### Run least square method. Least deviation from model row.
   
   ####
   ###
+  
+  #get row to aim for
   data_model_row <- dat %>%
     select(level)
   
@@ -209,8 +226,7 @@ get_row <- function(min_1, max_1, min_x, max_x, min_2, max_2, level){
   all_combinations_1x2 <- arrange(all_combinations_1x2, (square_mean))
   
   
-  
-  
+    
   #vald rad  
   best_row_1x2 <- all_combinations_1x2 %>%
     slice(which(row_number() == select_row))
