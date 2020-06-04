@@ -287,9 +287,9 @@ ui <- dashboardPage(skin = "black",
                 conditionalPanel("input.sidebarmenu === 'mean_square_model'",
 
     
-    radioButtons("model", "Choose a model",
-                 c("Mean-Square Model" = "m_mean_square",
-                   "Segment Model" = "m_segment")),
+ #   radioButtons("model", "Choose a model",
+  #               c("Mean-Square Model" = "m_mean_square",
+  #                 "Segment Model" = "m_segment")),
     
     radioButtons("level", "Choose a level",
                  c("Level 1" = "level_1",
@@ -320,7 +320,14 @@ ui <- dashboardPage(skin = "black",
     
     actionButton("update", "Get Optimal Row") 
     
-  ))),
+  )),
+                menuItem("Mean-Square Model", tabName = "mean_square_model", icon = icon("check-circle", lib = "font-awesome")),
+                conditionalPanel("input.sidebarmenu === 'mean_square_model'",
+
+    
+    radioButtons("model", "Choose a model",
+                c("Mean-Square Model" = "m_mean_square",
+                 "Segment Model" = "m_segment")))),
   
   
   
