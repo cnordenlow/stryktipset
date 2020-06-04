@@ -333,10 +333,43 @@ ui <- dashboardPage(skin = "black",
   
   
   dashboardBody(
+    tabItems(
+                        
+                        tabItem(
+                          tabName = "dashboard", class='active',
+                          fluidRow(
+                           
+                            box(title="Summary of ingoing data",
+                                
+                                status="primary", solidHeader = TRUE,width=12),
+                                                               
 
-    tableOutput("summary")
-  )
-)
+                            box(title="Regional Dashboard - Plot latest available regional data",
+                                status="primary", solidHeader = TRUE,width=12,
+                                
+                                   box(
+                                  plotlyOutput(outputId = "scatter_all"), height=500, width=12))
+                            
+
+                          )),
+                        
+                        
+                        
+                        tabItem(
+                          tabName = "mean_square_model",
+                          fluidRow(
+                            
+                            box(title="Select input parameters",
+                                status="primary", solidHeader = TRUE,width=12,
+                                
+                                box(#collapsible = TRUE,
+                                     tableOutput("summary"), width=6))))
+                                                 
+                        
+                    
+                      )
+                      
+  ))
 
 
 
