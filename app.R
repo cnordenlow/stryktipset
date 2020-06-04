@@ -1,5 +1,4 @@
 
-
 require(tidyverse)
 library(readxl)
 library(csv)
@@ -22,7 +21,7 @@ dat <-read_excel('data_stryk_test_loop.xlsx')
 
 ### EXTRA CRITERIAS ###
 
-min_value = 7 #Min med positivt spelvärde
+min_value = 7 #Min med positivt spelvÃ¤rde
 #Minimun totalt spelvarde 
 min_total_value = 15 #Min radens totala spelvarde
 
@@ -92,24 +91,8 @@ all_combinations_value <- tibble::rownames_to_column(all_combinations_value, "Ro
 
 all_combinations_value$obs_value <- rowSums(all_combinations_value[,2:14] > 0)
 all_combinations_value <- all_combinations_value%>%
-mutate(total_value = V1 + V2 + V3 +V4 +V5+V6+V7+V8+V9+V10+V11+V12+V13)
+  mutate(total_value = V1 + V2 + V3 +V4 +V5+V6+V7+V8+V9+V10+V11+V12+V13)
 
-###Att ha kriteriet här gör att man slipper ha det i funktionen. Borde gå snabbare.
-  ### Criteria: Calculate value  / spelvarde. Kommer alltid vilja ha en grundrad med positivt spelvärde. 
-  #regel summa spelv?rde som minst -25
-  all_combinations_value <- all_combinations_value%>%
-    filter(obs_value >= min_value)%>%
-  filter(total_value > min_total_value)
-    
-  #Decrease number of rows from new criteria
-  temp <- all_combinations_value %>%
-    select(Row)
-  
-  all_combinations_odds <- left_join(temp, all_combinations_odds, by = "Row")%>%
-    mutate(total_odds = V1 + V2 + V3 +V4 +V5+V6+V7+V8+V9+V10+V11+V12+V13)
-  
-  all_combinations_1x2 <- left_join(temp, all_combinations_1x2, by = "Row")
-  
 
 
 
@@ -124,11 +107,32 @@ all_combinations_1x2$obs_1 <- rowSums(all_combinations_1x2[,2:14] == 1)
 all_combinations_1x2$obs_0 <- rowSums(all_combinations_1x2[,2:14] == 0)
 all_combinations_1x2$obs_2 <- rowSums(all_combinations_1x2[,2:14] == 2)
 
+
+
+###Att ha kriteriet hÃ¤r gÃ¶r att man slipper ha det i funktionen. Borde gÃ¥ snabbare.
+### Criteria: Calculate value  / spelvarde. Kommer alltid vilja ha en grundrad med positivt spelvÃ¤rde. 
+#regel summa spelv?rde som minst -25
+all_combinations_value <- all_combinations_value%>%
+  filter(obs_value >= min_value)%>%
+  filter(total_value > min_total_value)
+
+#Decrease number of rows from new criteria
+temp <- all_combinations_value %>%
+  select(Row)
+
+all_combinations_odds <- left_join(temp, all_combinations_odds, by = "Row")%>%
+  mutate(total_odds = V1 + V2 + V3 +V4 +V5+V6+V7+V8+V9+V10+V11+V12+V13)
+
+all_combinations_1x2 <- left_join(temp, all_combinations_1x2, by = "Row")
+
+
+
+
 get_row <- function(min_1, max_1, min_x, max_x, min_2, max_2, level){
   
- ### 
+  ### 
   ##############Flytta upp denna
- ### 
+  ### 
   ### Criteriacount number of 1,x,2 per row
   
   all_combinations_1x2 <- all_combinations_1x2 %>%
@@ -142,21 +146,21 @@ get_row <- function(min_1, max_1, min_x, max_x, min_2, max_2, level){
   all_combinations_odds <- left_join(temp, all_combinations_odds, by = "Row")
   all_combinations_value <- left_join(temp, all_combinations_value, by = "Row")
   
-   ### 
- 
- ### 
-
+  ### 
+  
+  ### 
+  
   ### Criteria: Calculate value  / spelvarde. Regel: minst antal med positivt spelvarde
   #regel summa spelv?rde som minst -25
   #all_combinations_value <- all_combinations_value%>%
   #filter(obs_value >= min_value)
-    
+  
   #Decrease number of rows from new criteria
   #temp <- all_combinations_value %>%
   #  select(Row)
   
- # all_combinations_odds <- left_join(temp, all_combinations_odds, by = "Row")%>%
- #   mutate(total_odds = V1 + V2 + V3 +V4 +V5+V6+V7+V8+V9+V10+V11+V12+V13)
+  # all_combinations_odds <- left_join(temp, all_combinations_odds, by = "Row")%>%
+  #   mutate(total_odds = V1 + V2 + V3 +V4 +V5+V6+V7+V8+V9+V10+V11+V12+V13)
   
   #all_combinations_1x2 <- left_join(temp, all_combinations_1x2, by = "Row")
   
@@ -164,7 +168,7 @@ get_row <- function(min_1, max_1, min_x, max_x, min_2, max_2, level){
   
   
   
-  ###Fråga: lägg in total value för "all_combinations_odds"
+  ###FrÃ¥ga: lÃ¤gg in total value fÃ¶r "all_combinations_odds"
   
   ##### Run least square method. Least deviation from model row.
   
@@ -226,7 +230,7 @@ get_row <- function(min_1, max_1, min_x, max_x, min_2, max_2, level){
   all_combinations_1x2 <- arrange(all_combinations_1x2, (square_mean))
   
   
-    
+  
   #vald rad  
   best_row_1x2 <- all_combinations_1x2 %>%
     slice(which(row_number() == select_row))
@@ -260,7 +264,11 @@ get_row <- function(min_1, max_1, min_x, max_x, min_2, max_2, level){
   
   
   
+  
   best_row_1x2 <- full_join(best_row_1x2, best_row_odds, by = "Row", all = TRUE)
+  
+  best_row_1x2 <- best_row_1x2 %>%
+    mutate(tecken = as.character(tecken))
   
   return(best_row_1x2)
   
@@ -274,83 +282,92 @@ get_row <- function(min_1, max_1, min_x, max_x, min_2, max_2, level){
 
 ui <- dashboardPage(skin = "black",
                     dashboardHeader(title = "Stryktipset",tags$li(class = "dropdown", actionButton(inputId='show', label="Learn More", icon = icon("th")))),
-  
-  #dashboardHeader(title = "Stryktipset"),
-  
-  dashboardSidebar(
-    
-    sidebarMenu(id = "sidebarmenu",
-                menuItem("Dashboard", tabName = "dashboard",  icon = icon("group", lib="font-awesome")),
-                conditionalPanel("input.sidebarmenu === 'dashboard'"),
-    
-                menuItem("Mean-Square Model", tabName = "mean_square_model", icon = icon("check-circle", lib = "font-awesome")),
-                conditionalPanel("input.sidebarmenu === 'mean_square_model'",
-
-    
- #   radioButtons("model", "Choose a model",
-  #               c("Mean-Square Model" = "m_mean_square",
-  #                 "Segment Model" = "m_segment")),
-    
-    radioButtons("level", "Choose a level",
-                 c("Level 1" = "level_1",
-                   "Level 2" = "level_2",
-                   "Level 3" = "level_3",
-                   "Level 4" = "level_4",
-                   "Level 5" = "level_5")),
-    
-    
-    
-    sliderInput("number_1", "Select range for 1",
-                min = 1, max = 13,
-                value = c(2,8)),
-    
-    sliderInput("number_x", "Select range for x",
-                min = 1, max = 13,
-                value = c(2,8)),
-    
-    sliderInput("number_2", "Select range for 2",
-                min = 1, max = 13,
-                value = c(2,8)),
-    
-    helpText("Choose number of garderingar."),
-    
-    
-    numericInput("halvgarderingar", "Number of half-hedges",
-                 5, min = 0, max = 13),
-    
-    actionButton("update", "Get Optimal Row") 
-    
-  )),
-                menuItem("Mean-Square Model", tabName = "mean_square_model", icon = icon("check-circle", lib = "font-awesome")),
-                conditionalPanel("input.sidebarmenu === 'mean_square_model'",
-
-    
-    radioButtons("model", "Choose a model",
-                c("Mean-Square Model" = "m_mean_square",
-                 "Segment Model" = "m_segment")))),
-  
-  
-  
-  
-  dashboardBody(
-    tabItems(
+                    
+                    #dashboardHeader(title = "Stryktipset"),
+                    
+                    dashboardSidebar(
+                      
+                      sidebarMenu(id = "sidebarmenu",
+                                  menuItem("Dashboard", tabName = "dashboard",  icon = icon("group", lib="font-awesome")),
+                                  conditionalPanel("input.sidebarmenu === 'dashboard'"),
+                                  
+                                  menuItem("Mean-Square Model", tabName = "mean_square_model", icon = icon("check-circle", lib = "font-awesome")),
+                                  conditionalPanel("input.sidebarmenu === 'mean_square_model'",
+                                                   
+                                                   
+                                                   #   radioButtons("model", "Choose a model",
+                                                   #               c("Mean-Square Model" = "m_mean_square",
+                                                   #                 "Segment Model" = "m_segment")),
+                                                   
+                                                   
+                                                   helpText("Choose criterias for optimal Row"),
+                                                   
+                                                   
+                                                   radioButtons("level", "Choose a level",
+                                                                c("Level 1" = "level_1",
+                                                                  "Level 2" = "level_2",
+                                                                  "Level 3" = "level_3",
+                                                                  "Level 4" = "level_4",
+                                                                  "Level 5" = "level_5")),
+                                                   
+                                                   
+                                                   
+                                                   sliderInput("number_1", "Select range for 1",
+                                                               min = 1, max = 13,
+                                                               value = c(2,8)),
+                                                   
+                                                   sliderInput("number_x", "Select range for x",
+                                                               min = 1, max = 13,
+                                                               value = c(2,8)),
+                                                   
+                                                   sliderInput("number_2", "Select range for 2",
+                                                               min = 1, max = 13,
+                                                               value = c(2,8)),
+                                                   
+                                                   
+                                                   actionButton("update", "Get Optimal Row"),
+                                                   actionButton("reset", "Reset"),
+                                                   
+                                                   helpText("Choose number of half-hedges"),
+                                                   
+                                                   
+                                                   numericInput("halvgarderingar", "Number of half-hedges",
+                                                                5, min = 0, max = 13),
+                                                   
+                                                   actionButton("update_gardering", "Get half-hedgess") 
+                                                   
+                                  )),
+                      
+                      menuItem("Segment Model", tabName = "segment_model", icon = icon("check-circle", lib = "font-awesome")),
+                      conditionalPanel("input.sidebarmenu === 'segment_model'",
+                                       
+                                       
+                                       radioButtons("test", "Choose a model",
+                                                    c("test" = "m_mean_square",
+                                                      "test" = "m_segment")))),
+                    
+                    
+                    
+                    
+                    dashboardBody(
+                      tabItems(
                         
                         tabItem(
                           tabName = "dashboard", class='active',
                           fluidRow(
-                           
+                            
                             box(title="Summary of ingoing data",
                                 
-                                status="primary", solidHeader = TRUE,width=12),
-                                                               
-
-                            box(title="Regional Dashboard - Plot latest available regional data",
-                                status="primary", solidHeader = TRUE,width=12,
-                                
-                                   box(
-                                  plotlyOutput(outputId = "scatter_all"), height=500, width=12))
+                                status="primary", solidHeader = TRUE,width=12)
                             
-
+                            
+                          #  box(title="Regional Dashboard - Plot latest available regional data",
+                              #  status="primary", solidHeader = TRUE,width=12,
+                                
+                               # box(
+                                #  plotlyOutput(outputId = "scatter_all"), height=500, width=12))
+                            
+                            
                           )),
                         
                         
@@ -359,17 +376,17 @@ ui <- dashboardPage(skin = "black",
                           tabName = "mean_square_model",
                           fluidRow(
                             
-                            box(title="Select input parameters",
+                            box(title="Optimal Row",
                                 status="primary", solidHeader = TRUE,width=12,
                                 
                                 box(#collapsible = TRUE,
-                                     tableOutput("summary"), width=6))))
-                                                 
+                                  tableOutput("summary"), width=6))))
                         
-                    
+                        
+                        
                       )
                       
-  ))
+                    ))
 
 
 
@@ -379,68 +396,76 @@ server <- function(input, output) {
   # Note that we use eventReactive() here, which depends on
   # input$update (the action button), so that the output is only
   # updated when the user clicks the button
+  
+  
+  mylist <- reactiveValues() # we will store the inputs in a reactive list
+  
+ # eventReactive(input$update,{
+  observeEvent(input$update,{
+#    input$update
+    
+    
+    min_1 = input$number_1[1]
+    max_1 = input$number_1[2]
+    min_x = input$number_x[1]
+    max_x = input$number_x[2]
+    min_2 = input$number_2[1]
+    max_2 = input$number_2[2]
+    level = input$level
+    #      medium = input$Medium,
+    #     campaign = input$Camp))
+    
+    
+    mylist$hej <- isolate({
+      
+      get_row(
+        min_1,
+        max_1,
+        min_x,
+        max_x,
+        min_2,
+        max_2,
+        level
+      )
+      
+    })
+    
+    
+  })     
+  
+  
+  #  my_table <- eventReactive(input$update, { # "runScript" is an action button
+  #      source("run_meansquare.R", local = list2env(mylist()))
+  #   })
+  
+  #   df <- eventReactive(input$update, function() {
+  #      best_row_1x2
+  #   })
+  
+  
+  observeEvent(input$reset, {
+    mylist$hej <- NULL
+    input$update == 0
+  })  
+    
 
   
-    mylist <- reactiveValues() # we will store the inputs in a reactive list
-    
-    
-    observe({
-      input$update
-      
-
-        min_1 = input$number_1[1]
-        max_1 = input$number_1[2]
-        min_x = input$number_x[1]
-        max_x = input$number_x[2]
-        min_2 = input$number_2[1]
-        max_2 = input$number_2[2]
-        level = input$level
-      #      medium = input$Medium,
-      #     campaign = input$Camp))
-      
-      
-      mylist$hej <- isolate({
-        
-        get_row(
-          min_1,
-          max_1,
-          min_x,
-          max_x,
-          min_2,
-          max_2,
-          level
-        )
-      
-    })
-    
- 
-   })     
-    
-    
-#  my_table <- eventReactive(input$update, { # "runScript" is an action button
-#      source("run_meansquare.R", local = list2env(mylist()))
- #   })
-    
- #   df <- eventReactive(input$update, function() {
-#      best_row_1x2
- #   })
-    
-    
-    output$summary <- renderTable({
-      if(input$update == 0) ""
-      else
-        mylist$hej
-    })
+  
+  output$summary <- renderTable({
+    if(input$update == 0) ""
+    else
+      mylist$hej
+  })
   
   #  output$mtcars <- renderTable(head(mtcars))
-
-
-
-    observeEvent(input$show, {
-      showModal(modalDialog(
-        title = "More information",
-        
-        HTML("Data based on release date of regional data. There may be a later print on aggregate level. <br><br>
+  
+  
+  
+  observeEvent(input$show, {
+    showModal(modalDialog(
+      title = "More information",
+      
+      HTML("Data based on release date of regional data. There may be a later print on aggregate level. <br><br>
         <b>Initial Jobless Claims:</b> People filing to receive unenpmoyment insurance benefits for the first time. Reliable number. Moves close to general economy, good indicator. <br><br>
         <b>Continuing Jobless Claims:</b> People who are continuing filing to receive unenpmoyment insurance. <br><br>
         <b>Unemployment Rate:</b> The unemployment rate measured as the number of persons unemployed divided by the civilian labor force.<br><br>
@@ -449,12 +474,12 @@ server <- function(input, output) {
         <b>Civilian Population:</b> In the United States, the civilian noninstitutional population refers to people 16 years of age and older residing in the 50 States and the District of Columbia who are not inmates of institutions (penal, mental facilities, homes for the aged), and who are not on active duty in the Armed Forces.<br><br>
              
          "
-             
-        ),
-        
-        easyClose = TRUE
-      ))
-    })
-
+           
+      ),
+      
+      easyClose = TRUE
+    ))
+  })
+  
 }
 shinyApp(ui, server)
