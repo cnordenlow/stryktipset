@@ -12,7 +12,8 @@ library(ggplot2)
 library(shinydashboard)
 library(shiny)
 
-options(na.action = na.warn)
+#options(na.action = na.warn)
+options(na.action = modelr::na.warn)  
 
 setwd("c:/Users/chris/Documents/R_Studio/")
 
